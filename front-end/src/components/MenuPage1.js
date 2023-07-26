@@ -1,29 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from './Footer.js';
-import './HomePage.css'; //
+import './MenuPage1.css';
+import axios from 'axios';
 
 const MenuPage1 = () => {
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
-  const [selectedOption, setSelectedOption] = useState('');
+  const [questions, setQuestions] = useState([]);
 
-  const handleQuestionChange = (event) => {
-    setQuestion(event.target.value);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const timestamp = new Date().toISOString();
+      const questionNumberArray = [1, 2, 3, 4, 5];
+      const type_variable = "Performance Analysis";
+      const website_name = "https://fingpt-backend-07a26388d3cf.herokuapp.com/"; // Define your website name here
+
+      const requests = questionNumberArray.map((questionNumber) =>
+        axios.post(`${website_name}/get-data`, { // Use the website_name variable in the URL
+          timestamp,
+          question_number: questionNumber,
+          type: type_variable,
+        })
+      );
+      console.log("Request made");
+      const responses = await axios.all(requests);
+      const updatedQuestions = responses.reduce((acc, response) => {
+        if (response.data.status === 'success') {
+          response.data.showAnswer = false; // Add showAnswer property
+          acc.push(response.data);
+        }
+        return acc;
+      }, []);
+      setQuestions(updatedQuestions);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
-  const handleAnswerChange = (event) => {
-    setAnswer(event.target.value);
-  };
-
-  const handleOptionChange = (event) => {
-    setSelectedOption(event.target.value);
-  };
-
-  const submitQuestionAnswer = () => {
-    // Perform any necessary logic with the question and answer
-    console.log('Question:', question);
-    console.log('Answer:', answer);
+  const toggleAnswer = (index) => {
+    const updatedQuestions = [...questions];
+    updatedQuestions[index].showAnswer = !updatedQuestions[index].showAnswer;
+    setQuestions(updatedQuestions);
   };
 
   return (
@@ -46,31 +66,15 @@ const MenuPage1 = () => {
         <li>"What are the top-performing assets in my portfolio?"</li>
         <li>"Compare my portfolio's performance to the S&amp;P 500 index."</li>
       </ul></p>
-
-      <div className="text-area-container">
-        <textarea
-          className="question-textarea"
-          placeholder="Enter your question"
-          value={question}
-          onChange={handleQuestionChange}
-          style={{ display: selectedOption === 'ask' ? 'block' : 'none' }}
-        ></textarea>
-        <input
-          type="file"
-          className="file-input"
-          style={{ display: selectedOption === 'upload' ? 'block' : 'none' }}
-        />
-      </div>
-      <div className="dropdown-container">
-        <select className="dropdown-menu" value={selectedOption} onChange={handleOptionChange}>
-          <option value="">Select an option</option>
-          <option value="ask">Ask a question</option>
-          <option value="upload">Upload a file</option>
-        </select>
-      </div>
-      
-      <div className="button-container">
-        <button className="submit-button" onClick={submitQuestionAnswer}>Submit</button>
+      <div className="questions-container">
+        {questions.map((question, index) => (
+          <div key={index} className="question-container">
+            <div className="question" onClick={() => toggleAnswer(index)}>
+              {question.question}
+            </div>
+            {question.showAnswer && <div className="answer">{question.answer}</div>}
+          </div>
+        ))}
       </div>
       <Footer />
     </div>
