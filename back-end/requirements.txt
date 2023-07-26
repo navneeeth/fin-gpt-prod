@@ -1,0 +1,6 @@
+flask
+pymongo
+openai
+flask_cors
+gunicorn
+validators

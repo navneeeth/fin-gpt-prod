@@ -1,0 +1,141 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  footer {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px;
+    text-align: center;
+  }
+  .size-note{
+    font-size: medium;
+  }
+.size-footer{
+  font-size: small;
+}
+
+  h1 {
+    margin-top: 50px;
+    font-size: 2.5rem;
+    text-align: center;
+    color: white;
+  }
+  
+  p {
+    font-size: 1.2rem;
+    text-align: center;
+    color: white;
+  }
+  
+  .about {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 1.2rem;
+    color: #777;
+  }
+  .about-link {
+    color: white;
+  }
+  
+  
+  .menu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 50px;
+  }
+  
+  .menu-item {
+    width: 200px;
+    height: 200px;
+    margin: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  
+  .menu1 {
+    background-color: #ff6b6b;
+  }
+  
+  .menu2 {
+    background-color: #6c5ce7;
+  }
+  
+  .menu3 {
+    background-color: #feca57;
+  }
+  
+  .menu4 {
+    background-color: #1dd1a1;
+  }
+  
+  .menu5 {
+    background-color: #00d2d3;
+  }
+  .center-text {
+    text-align: center;
+  }
+  .container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .text-area-container {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+  }
+  
+  .question-textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #0cccdd;
+    border-radius: 5px;
+    resize: vertical;
+  }
+  .answer-textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #0cccdd;
+    border-radius: 5px;
+    resize: vertical;
+  }
+  
+  .button-container {
+    margin-top: 10px;
+  }
+  
+  .submit-button {
+    padding: 10px 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #ee0f0fe3;
+  }
+  .middle { 
+    text-align: center;
+    width: 500px;
+  }
+  
