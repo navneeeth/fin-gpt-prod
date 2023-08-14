@@ -3,6 +3,8 @@ from datetime import datetime
 from database_handler import get_question_answer, create_api_log
 from flask_cors import CORS
 
+import helpers.csv_helpers as csv_helpers
+import helpers.openai_helpers as openai_helpers
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes in the app
 
@@ -60,6 +62,63 @@ def get_data():
         print('question_number: '+ str(question_number))
         response_data = {'status': status, 'error': error_message}
         return jsonify(response_data), 500
+
+
+@app.route('/validate-file', methods=['POST'])
+def validate_file():
+    try:
+        # Check if a file was uploaded
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+
+        file = request.files['file']
+
+        # Check if the file has a filename
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        # Check if the file is a CSV file
+        if not csv_helpers.is_csv(file):
+            return jsonify({'error': 'File is not a CSV'}), 400
+
+        # Read and parse the CSV data
+        csv_data = file.read().decode('utf-8')
+
+        # Check if the CSV data is readable
+        if not csv_helpers.is_csv_data_readable(csv_data):
+            return jsonify({'error': 'CSV data is not readable'}), 400
+
+        # Check if the CSV has more than 100 rows
+        if not csv_helpers.has_more_than_100_rows(csv_data):
+            return jsonify({'error': 'CSV has less than 100 rows'}), 400
+
+        # Call the isRelevant() function with page_name parameter
+        page_name = request.form.get('page_name')
+        
+        if page_name is None:
+            return jsonify({'error': 'Missing page_name parameter'}), 400
+        
+        openai_id = request.form.get('openai-id')
+        result = openai_helpers.isRelevant(page_name, openai_id, csv_data)
+        
+        if result:
+            return jsonify({'status': 'success', 'result': result})
+        else:
+            return jsonify({'status': 'error', 'message': 'The file data is not relevant to the current page.'}), 400
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/validate-openai-id', methods=['POST'])
+def validate_openai_id_route():
+    data = request.get_json()
+    openai_id = data.get('openai-id')
+
+    if openai_id is None:
+        return jsonify({'status': 'error', 'message': 'Missing openai-id parameter'}), 400
+
+    result = openai_helpers.validate_openai_id(openai_id)
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(debug=True)
