@@ -67,10 +67,11 @@ def get_data():
 @app.route('/validate-file', methods=['POST'])
 def validate_file():
     try:
+        
         # Check if a file was uploaded
         if 'file' not in request.files:
             return jsonify({'error': 'No file part'}), 400
-
+        print('File uploaded')
         file = request.files['file']
 
         # Check if the file has a filename
@@ -80,25 +81,29 @@ def validate_file():
         # Check if the file is a CSV file
         if not csv_helpers.is_csv(file):
             return jsonify({'error': 'File is not a CSV'}), 400
-
+        print('File is a CSV')
         # Read and parse the CSV data
         csv_data = file.read().decode('utf-8')
-
+        
         # Check if the CSV data is readable
         if not csv_helpers.is_csv_data_readable(csv_data):
             return jsonify({'error': 'CSV data is not readable'}), 400
-
+        print('File is readable')
         # Check if the CSV has more than 100 rows
-        if not csv_helpers.has_more_than_100_rows(csv_data):
-            return jsonify({'error': 'CSV has less than 100 rows'}), 400
-
+        if csv_helpers.has_more_than_100_rows(csv_data):
+            return jsonify({'error': 'CSV has more than 100 rows'}), 400
+        print('File data is accurate')
         # Call the isRelevant() function with page_name parameter
         page_name = request.form.get('page_name')
         
         if page_name is None:
             return jsonify({'error': 'Missing page_name parameter'}), 400
-        
+        print('Page name parameter exists')
         openai_id = request.form.get('openai-id')
+        validation_status = openai_helpers.validate_openai_id(openai_id)
+        if validation_status['status'] == 'error':
+            return validation_status
+        print('OpenAI key validated')
         result = openai_helpers.isRelevant(page_name, openai_id, csv_data)
         
         if result:
