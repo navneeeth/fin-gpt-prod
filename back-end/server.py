@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from datetime import datetime
 from database_handler import get_question_answer, create_api_log
 from flask_cors import CORS
-
+import os
 import helpers.csv_helpers as csv_helpers
 import helpers.openai_helpers as openai_helpers
 app = Flask(__name__)
@@ -63,6 +63,45 @@ def get_data():
         response_data = {'status': status, 'error': error_message}
         return jsonify(response_data), 500
 
+@app.route('/ask-a-question', methods=['POST'])
+def ask_a_question():
+    try:
+        # Receive the file and form parameters from the request
+        openai_id = request.form.get('openai-id')
+        question = request.form.get('question')
+        file = request.files.get('file')
+
+        # Check if openai_id and question are provided
+        if not openai_id:
+            return jsonify({'status': 'failure', 'message': 'openai_id is missing in the request'}), 400
+        if not question:
+            return jsonify({'status': 'failure', 'message': 'question is missing in the request'}), 400
+
+        # Check if a file is provided
+        if not file:
+            return jsonify({'status': 'failure', 'message': 'file is missing in the request'}), 400
+
+        # Save the file to a temporary location
+        file_path = 'uploaded_file.csv'
+        file.save(file_path)
+
+        # Check if the file was successfully saved
+        if not os.path.exists(file_path):
+            return jsonify({'status': 'failure', 'message': 'Failed to save the file'}), 500
+
+        # Call answerUserQuery and receive status, message values from the function
+        status, message = openai_helpers.answer_user_query(openai_id, file_path, question)
+
+        if status:
+            # If the status returns true, return status: 'success' and the message as JSON in the API response
+            return jsonify({'status': 'success', 'message': message}), 200
+        else:
+            # Else, return status: 'failure' and message as JSON in the API response
+            return jsonify({'status': 'failure', 'message': message}), 200
+
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/validate-file', methods=['POST'])
 def validate_file():
@@ -104,7 +143,7 @@ def validate_file():
         if validation_status['status'] == 'error':
             return validation_status
         print('OpenAI key validated')
-        result = openai_helpers.isRelevant(page_name, openai_id, csv_data)
+        result = openai_helpers.is_relevant(page_name, openai_id, csv_data)
         
         if result:
             return jsonify({'status': 'success', 'result': result})
