@@ -36,7 +36,7 @@ p {
 .question-container {
   margin-top: 20px;
   width: 500px;
-  background-color: #f5f5f5;
+  color: #4935ddbf;
   border-radius: 5px;
   padding: 10px;
   cursor: pointer;
@@ -79,8 +79,34 @@ p {
   .questions-container {
     width: 90%;
   }
-
-  .question-container {
-    width: 100%;
-  }
 }
+  
+  .submit-button {
+    padding: 10px 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #ee0f0fe3;
+  }
+  .middle { 
+    text-align: center;
+    width: 500px;
+  }
+  
+  /* MenuPage1.css */
+
+/* Style for the container */
+
+/* Style for the file input */
+input[type="file"] {
+  display:inline; /* Hide the default file input */
+}
+
+/* Style for the custom upload button */
+/* Style for the custom upload button on hover */
+

@@ -84,4 +84,6 @@
       width: 100%;
     }
   }
-  
+  input[type="file"] {
+    display:inline; /* Hide the default file input */
+  }

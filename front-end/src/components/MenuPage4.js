@@ -6,7 +6,8 @@ import axios from 'axios';
 
 const MenuPage4 = () => {
   const [questions, setQuestions] = useState([]);
-
+  const type_variable = "Optimization Queries";
+  const website_name = "https://fingpt-backend-07a26388d3cf.herokuapp.com/"; // Define your website name here
   useEffect(() => {
     fetchData();
   }, []);
@@ -15,9 +16,6 @@ const MenuPage4 = () => {
     try {
       const timestamp = new Date().toISOString();
       const questionNumberArray = [1, 2, 3, 4, 5];
-      const type_variable = "Optimization Queries";
-      const website_name = "https://fingpt-backend-07a26388d3cf.herokuapp.com/"; // Define your website name here
-
       const requests = questionNumberArray.map((questionNumber) =>
         axios.post(`${website_name}/get-data`, { // Use the website_name variable in the URL
           timestamp,
@@ -46,24 +44,125 @@ const MenuPage4 = () => {
     setQuestions(updatedQuestions);
   };
 
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [fileUploaded, setFileUploaded] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [apiKeyVerified, setApiKeyVerified] = useState(false);
+  const [question, setQuestion] = useState('');
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file.type === 'text/csv') 
+    {
+      // The file is a CSV file
+      setSelectedFile(file);
+      setErrorMessage('');
+    } else {
+      // The file is not a CSV file
+      setSelectedFile(null);
+      setErrorMessage('Please choose a CSV file.');
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (selectedFile && apiKeyVerified) {
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('page_name', type_variable); // Replace with the actual page name
+        formData.append('openai-id', apiKey); // Replace with the actual OpenAI key
+  
+        const response = await fetch(`${website_name}/validate-file`, {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+  
+        if (data.status === 'success') {
+          console.log("successfull");
+          setFileUploaded(true);
+        } else {
+          
+          console.log('API call returned an error:', data.error);
+        }
+      } catch (error) {
+        
+        console.error('Error during API call:', error);
+      }
+    } else {
+      console.log('No file selected or API key not verified.');
+    }
+  };
+
+  const handleOpenAIKeyChange = (event) => {
+    const key = event.target.value;
+    setApiKey(key);
+    setApiKeyVerified(false); // Reset the API key verification status when the key is changed
+  };
+
+  const verifyOpenAIKey = async () => {
+    // Your OpenAI API key validation logic here
+    // For example, you can make an API call to validate the key
+    // and set apiKeyVerified based on the response
+    const isValidKey = validateOpenAIKey(apiKey);
+    setApiKeyVerified(isValidKey);
+  };
+
+  const validateOpenAIKey = async (key) => {
+    try {
+      const response = await fetch(`${website_name}/validate-openai-id`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 'openai-id': key }),
+      });
+  
+      const data = await response.json();
+  
+      if (data.status === 'success') {
+        console.log("API key verified");
+        return true;
+      } else {
+        console.log("API key  not verified")
+        return false;
+      }
+    } catch (error) {
+      console.error('Error validating OpenAI key:', error);
+      return false;
+    }
+  };
+
+  const handleQuestionChange = (event) => {
+    setQuestion(event.target.value);
+  };
+
+  
+  const handleAskQuestion = () => {
+    // Handle asking the question here
+    // You can make an API call to your backend to get the answer using the question and selectedFile
+    console.log('Question:', question);
+    console.log('Selected File:', selectedFile);
+    // Implement the logic to get the answer and show it to the user
+  };
+
+
   return (
     <div className="container">
       <button className="back-button">
-        <Link to="/" className="back-link">
+        <Link to="/Home" className="back-link">
           Back to Home
         </Link>
       </button>
       <h1>Optimization Queries</h1>
-      <p>Users can seek suggestions on optimizing their portfolios based on their investment goals, risk tolerance, and market trends. The model can provide recommendations on asset allocation, rebalancing strategies, 
-        and potential investment opportunities aligned with the user's 
-        preferences</p>
-        <p>
-        Example user queries:<ul>
-          <li>"How should I rebalance my portfolio to align with my target asset allocation?"</li>
-          <li>  "What are some investment opportunities I should consider based on current market trends?"</li>
-          <li>"How can I optimize my portfolio for income generation?"</li>
-        </ul>
-        </p>
+      <p>Users can seek suggestions on optimizing their portfolios based on their investment goals, risk tolerance, and market trends. The model can provide recommendations on asset allocation, rebalancing strategies, and potential investment opportunities aligned with the user's preferences</p>
+      <p>Example user queries:
+      <ul>
+        <li>"How should I rebalance my portfolio to align with my target asset allocation?"</li>
+        <li>"What are some investment opportunities I should consider based on current market trends?"</li>
+        <li>"How can I optimize my portfolio for income generation?"</li>
+      </ul></p>
       <div className="questions-container">
         {questions.map((question, index) => (
           <div key={index} className="question-container">
@@ -74,6 +173,38 @@ const MenuPage4 = () => {
           </div>
         ))}
       </div>
+      <p></p>
+      {!apiKeyVerified ? (
+        <div>
+          <input
+            type="text"
+            placeholder="Enter your OpenAI key"
+            value={apiKey}
+            onChange={handleOpenAIKeyChange}
+          />
+          <button onClick={verifyOpenAIKey}>Verify Key</button>
+        </div>
+      ) : (
+        <div>
+          <input className="submit-button:hover" type="file" onChange={handleFileChange} />
+          <button className="submit-button" onClick={handleFileUpload}>
+            {fileUploaded ? 'File Uploaded' : 'Upload'}
+          </button>
+          {errorMessage && <p>{errorMessage}</p>}
+        </div>
+      )}
+      {fileUploaded && (
+        <div>
+          <h2 style={{ color: 'white' }}>Ask a Question:</h2>
+          <input
+            type="text"
+            placeholder="Enter your question here"
+            value={question}
+            onChange={handleQuestionChange}
+          />
+          <button onClick={handleAskQuestion}>Ask</button>
+        </div>
+      )}
       <Footer />
     </div>
   );
