@@ -5,46 +5,49 @@ import './MenuPage2.css';
 import './HomePage.css';
 import axios from 'axios';
 
+
 const MenuPage2 = () => {
   const [questions, setQuestions] = useState([]);
+  const type_variable = "Risk Assessment "; // Ensure that the space at the end is there for now
+  const website_name = "https://fingpt-backend-07a26388d3cf.herokuapp.com/"; // Define your website name here
   useEffect(() => {
     fetchData();
   }, []);
 
-  const type_variable = "Performance Analysis";
-  const website_name = "https://fingpt-backend-07a26388d3cf.herokuapp.com/"; // Define your website name here
   const [selectedFile, setSelectedFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [fileUploaded, setFileUploaded] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [apiKeyVerified, setApiKeyVerified] = useState(false);
   const [question, setQuestion] = useState('');
-
-  const fetchData = async () => {
-    try {
-      const timestamp = new Date().toISOString();
-      const questionNumberArray = [1, 2, 3, 4, 5];
-      const requests = questionNumberArray.map((questionNumber) =>
-        axios.post(`${website_name}/get-data`, { // Use the website_name variable in the URL
-          timestamp,
-          question_number: questionNumber,
-          type: type_variable,
-        })
-      );
-      console.log("Request made");
-      const responses = await axios.all(requests);
-      const updatedQuestions = responses.reduce((acc, response) => {
-        if (response.data.status === 'success') {
-          response.data.showAnswer = false; // Add showAnswer property
-          acc.push(response.data);
-        }
-        return acc;
-      }, []);
-      setQuestions(updatedQuestions);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
+   const inputStyle = {
+    width: `${question.length * 8}px`, // Adjust the factor as needed (e.g., 8 pixels per character)
+};
+const fetchData = async () => {
+  try {
+    const timestamp = new Date().toISOString();
+    const questionNumberArray = [1, 2, 3, 4, 5];
+    const requests = questionNumberArray.map((questionNumber) =>
+      axios.post(`${website_name}/get-data`, { // Use the website_name variable in the URL
+        timestamp,
+        question_number: questionNumber,
+        type: type_variable,
+      })
+    );
+    console.log("Request made");
+    const responses = await axios.all(requests);
+    const updatedQuestions = responses.reduce((acc, response) => {
+      if (response.data.status === 'success') {
+        response.data.showAnswer = false; // Add showAnswer property
+        acc.push(response.data);
+      }
+      return acc;
+    }, []);
+    setQuestions(updatedQuestions);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+};
 
   const toggleAnswer = (index)=> {
     const updatedQuestions = [...questions];
@@ -66,7 +69,6 @@ const MenuPage2 = () => {
   };
 
   const handleFileUpload = async () => {
-    
     if (selectedFile && apiKeyVerified) {
       try {
         const formData = new FormData();
@@ -136,12 +138,51 @@ const MenuPage2 = () => {
     setQuestion(event.target.value);
   };
   const handleAskQuestion = () => {
-    // Handle asking the question here
-    // You can make an API call to your backend to get the answer using the question and selectedFile
-    console.log('Question:', question);
-    console.log('Selected File:', selectedFile);
-    // Implement the logic to get the answer and show it to the user
+    // Prepare the data to send
+    const formData = new FormData();
+    formData.append('openai-id', apiKey); // Replace apiKey with your actual API key
+    formData.append('question', question);
+    formData.append('file', selectedFile);
+  
+    // Make an API call to your backend
+    fetch(`${website_name}/ask-a-question`,{
+      method: 'POST',
+      body: formData,
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Handle the response from your backend here
+        console.log('Response:', data);
+
+        // Check if the status is 'success' or 'failure'
+        const status = data.status;
+        const message = data.message;
+
+        // Get the HTML element where you want to display the answer
+        const answerElement = document.getElementById('answerElementId');
+
+        if (status === 'success') {
+          // Display success message in green
+          answerElement.innerHTML = `
+          <h3 style="color: green">Success! <br>Question: <br> ${question} <br> Answer: <br> ${message}</h3>
+          `;
+        } else if (status === 'failure') {
+          // Display failure message in red
+          answerElement.innerHTML = `
+            <h3 style="color: red">Invalid Question. Try Again: ${message}</h3>
+          `;
+        }
+      })
+      .catch(error => {
+        // Handle errors, e.g., network issues
+        console.error('Error:', error);
+      });
   };
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      verifyOpenAIKey();
+    }};
+
 
   return (
     <div className="container">
@@ -178,6 +219,7 @@ const MenuPage2 = () => {
             placeholder="Enter your OpenAI key"
             value={apiKey}
             onChange={handleOpenAIKeyChange}
+            onKeyDown={handleKeyPress}
           />
           <button onClick={verifyOpenAIKey}>Verify Key</button>
         </div>
@@ -192,15 +234,37 @@ const MenuPage2 = () => {
       )}
       {fileUploaded && (
         <div>
-          <h2>Ask a Question:</h2>
-          <input
-            type="text"
+        <h2 style={{ color: 'white' }}>Ask a Question:</h2>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <textarea
             placeholder="Enter your question here"
             value={question}
             onChange={handleQuestionChange}
+            style={{
+              ...inputStyle,
+              fontFamily: 'YourFontFamily, sans-serif',
+              marginRight: '10px', // Add some space between textarea and button
+              width: '400px',     // Adjust the width as needed
+              height: '50px'      // Adjust the height as needed
+            }}
           />
-          <button onClick={handleAskQuestion}>Ask</button>
+          <button
+            style={{
+              width: '100px',    // Adjust the width as needed
+              height: '50px',    // Adjust the height as needed
+              display: 'inline',
+              textAlign: 'center',
+            }}
+            onClick={() => {
+              handleAskQuestion();
+              setQuestion(""); // Clear the textarea
+            }}
+          >
+            Ask
+          </button>
         </div>
+        <div id="answerElementId"></div>
+      </div>
       )}
       <Footer />
     </div>

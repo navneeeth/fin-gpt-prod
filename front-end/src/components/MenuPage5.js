@@ -50,6 +50,9 @@ const MenuPage5 = () => {
   const [apiKey, setApiKey] = useState('');
   const [apiKeyVerified, setApiKeyVerified] = useState(false);
   const [question, setQuestion] = useState('');
+  const inputStyle = {
+    width: `${question.length * 8}px`, // Adjust the factor as needed (e.g., 8 pixels per character)
+};
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -137,14 +140,51 @@ const MenuPage5 = () => {
     setQuestion(event.target.value);
   };
 
-  const handleAskQuestion = () => {
-    // Handle asking the question here
-    // You can make an API call to your backend to get the answer using the question and selectedFile
-    console.log('Question:', question);
-    console.log('Selected File:', selectedFile);
-    // Implement the logic to get the answer and show it to the user
-  };
+    const handleAskQuestion = () => {
+    // Prepare the data to send
+    const formData = new FormData();
+    formData.append('openai-id', apiKey); // Replace apiKey with your actual API key
+    formData.append('question', question);
+    formData.append('file', selectedFile);
+  
+    // Make an API call to your backend
+    fetch(`${website_name}/ask-a-question`,{
+      method: 'POST',
+      body: formData,
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Handle the response from your backend here
+        console.log('Response:', data);
 
+        // Check if the status is 'success' or 'failure'
+        const status = data.status;
+        const message = data.message;
+
+        // Get the HTML element where you want to display the answer
+        const answerElement = document.getElementById('answerElementId');
+
+        if (status === 'success') {
+          // Display success message in green
+          answerElement.innerHTML = `
+          <h3 style="color: green">Success! <br>Question: <br> ${question} <br> Answer: <br> ${message}</h3>
+          `;
+        } else if (status === 'failure') {
+          // Display failure message in red
+          answerElement.innerHTML = `
+            <h3 style="color: red">Invalid Question. Try Again: ${message}</h3>
+          `;
+        }
+      })
+      .catch(error => {
+        // Handle errors, e.g., network issues
+        console.error('Error:', error);
+      });
+  };
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      verifyOpenAIKey();
+    }};
   return (
     <div className="container">
       <button className="back-button">
@@ -182,6 +222,7 @@ const MenuPage5 = () => {
             placeholder="Enter your OpenAI key"
             value={apiKey}
             onChange={handleOpenAIKeyChange}
+            onKeyDown={handleKeyPress}
           />
           <button onClick={verifyOpenAIKey}>Verify Key</button>
         </div>
@@ -195,17 +236,39 @@ const MenuPage5 = () => {
         </div>
       )}
       {fileUploaded && (
-        <div>
-          <h2>Ask a Question:</h2>
-          <input
-            type="text"
-            placeholder="Enter your question here"
-            value={question}
-            onChange={handleQuestionChange}
-          />
-          <button onClick={handleAskQuestion}>Ask</button>
-        </div>
-      )}
+       <div>
+       <h2 style={{ color: 'white' }}>Ask a Question:</h2>
+       <div style={{ display: 'flex', alignItems: 'center' }}>
+         <textarea
+           placeholder="Enter your question here"
+           value={question}
+           onChange={handleQuestionChange}
+           style={{
+             ...inputStyle,
+             fontFamily: 'YourFontFamily, sans-serif',
+             marginRight: '10px', // Add some space between textarea and button
+             width: '400px',     // Adjust the width as needed
+             height: '50px'      // Adjust the height as needed
+           }}
+         />
+         <button
+           style={{
+             width: '100px',    // Adjust the width as needed
+             height: '50px',    // Adjust the height as needed
+             display: 'inline',
+             textAlign: 'center',
+           }}
+           onClick={() => {
+             handleAskQuestion();
+             setQuestion(""); // Clear the textarea
+           }}
+         >
+           Ask
+         </button>
+       </div>
+       <div id="answerElementId"></div>
+     </div>
+)}
       <Footer />
     </div>
   );

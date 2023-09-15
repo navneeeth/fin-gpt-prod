@@ -9,7 +9,7 @@ body {
   margin: 0;
   padding: 0;
   background-image: url('/src/images/bg_5.jpg');
-  background-size: cover;
+  background-size:auto;
 
 }
 

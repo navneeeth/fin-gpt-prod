@@ -2,11 +2,46 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  text-align: center;
+}
+.submit-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-size: 16px;
+  border-radius: 5px;
+  margin: 10px;
+  cursor: pointer;
+}
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column-reverse;
+  }
+
+  .submit-button {
+    margin-top: 10px;
+  }
+}
+@media screen and (max-width: 600px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+
+  .questions-container {
+    width: 90%;
+  }
 }
 
 .back-button {
   margin-bottom: 20px;
+  width: auto; /* Allow the button to adjust its widtbased on content */
+  padding: 10px 20px;
+  height: 30px; 
 }
 
 .back-link {
@@ -66,30 +101,6 @@ p {
 .size-footer {
   font-size: small;
 }
-
-@media screen and (max-width: 600px) {
-  h1 {
-    font-size: 2rem;
-  }
-
-  p {
-    font-size: 1rem;
-  }
-
-  .questions-container {
-    width: 90%;
-  }
-}
-  
-  .submit-button {
-    padding: 10px 30px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
   .submit-button:hover {
     background-color: #ee0f0fe3;
   }
@@ -104,9 +115,36 @@ p {
 
 /* Style for the file input */
 input[type="file"] {
-  display:inline; /* Hide the default file input */
+  display:inline;
+  width: auto;
+  height:auto; /* Hide the default file input */
 }
 
+/* Style for the input element */
+/* Style for the input element */
+/* Style for the textarea element */
+textarea {
+  width: 200px; /* Initial predefined width */
+  min-width: 200px; /* Ensure it doesn't shrink below the initial width */
+  height: 10px; /* Let the height adjust automatically based on content */
+  padding-top: 30px; /* Adjust padding as needed for spacing */
+  font-size: 16px; /* Adjust font size as needed */
+  border: 1px solid #ccc; /* Add a border if desired */
+   /* Add border radius for rounded corners *
+  justify-content: center;/* Remove the default outline when focused */
+  /* Add any other styles you want */
+}
+button {
+  /* Adjust padding as needed */
+  font-size: 14px; /* Adjust font size as needed */
+  margin-top: 10px; /* Adjust margin as needed */
+  border: 1px solid #ccc; /* Add a border if desired */
+  border-radius: 5px; /* Add border radius for rounded corners */
+  cursor: pointer;
+  width: auto;
+  height: auto;
+  /* Add any other styles you want */
+}
 /* Style for the custom upload button */
 /* Style for the custom upload button on hover */
 

@@ -13,7 +13,9 @@ const MenuPage1 = () => {
   const [apiKey, setApiKey] = useState('');
   const [apiKeyVerified, setApiKeyVerified] = useState(false);
   const [question, setQuestion] = useState('');
-  const [uploadError, setUploadError] = useState('');
+  const inputStyle = {
+    width: `${question.length * 8}px`, // Adjust the factor as needed (e.g., 8 pixels per character)
+};
   const type_variable = "Performance Analysis";
   const website_name = "https://fingpt-backend-07a26388d3cf.herokuapp.com/"; // Define your website name here
   useEffect(() => {
@@ -84,11 +86,10 @@ const MenuPage1 = () => {
           console.log("successfull");
           setFileUploaded(true);
         } else {
-          setUploadError(data.error);
           console.log('API call returned an error:', data.error);
         }
       } catch (error) {
-        setUploadError('An error occurred during file upload.');
+        
         console.error('Error during API call:', error);
       }
     } else {
@@ -153,8 +154,25 @@ const MenuPage1 = () => {
       .then(data => {
         // Handle the response from your backend here
         console.log('Response:', data);
-        
-        // Implement the logic to show the answer to the user
+
+        // Check if the status is 'success' or 'failure'
+        const status = data.status;
+        const message = data.message;
+
+        // Get the HTML element where you want to display the answer
+        const answerElement = document.getElementById('answerElementId');
+
+        if (status === 'success') {
+          // Display success message in green
+          answerElement.innerHTML = `
+          <h3 style="color: green">Success! <br>Question: <br> ${question} <br> Answer: <br> ${message}</h3>
+          `;
+        } else if (status === 'failure') {
+          // Display failure message in red
+          answerElement.innerHTML = `
+            <h3 style="color: red">Invalid Question. Try Again: ${message}</h3>
+          `;
+        }
       })
       .catch(error => {
         // Handle errors, e.g., network issues
@@ -174,6 +192,18 @@ const MenuPage1 = () => {
         </Link>
       </button>
       <h1>Performance Analysis</h1>
+      <p>  Users can ask questions about the historical performance of their investment portfolios. They can inquire about the overall returns, 
+        individual asset performance, and compare their 
+        portfolio's performance to a benchmark or market index.
+         The model can provide insights on the portfolio's 
+         performance over different time periods, highlight the best and worst-performing assets, 
+         and offer suggestions for improving performance</p>
+         <p>Example user queries:<ul>
+          <li>"How has my portfolio performed over the past year?"</li>
+          <li>"What are the top-performing assets in my portfolio?"</li>
+          <li>"Compare my portfolio's performance to the S&P 500 index."</li>
+          </ul>
+         </p>
       <div className="questions-container">
         {questions.map((question, index) => (
           <div key={index} className="question-container">
@@ -206,17 +236,40 @@ const MenuPage1 = () => {
         </div>
       )}
       {fileUploaded && (
-        <div>
-          <h2 style={{ color: 'white' }}>Ask a Question:</h2>
-          <input
-            type="text"
-            placeholder="Enter your question here"
-            value={question}
-            onChange={handleQuestionChange}
-          />
-          <button onClick={handleAskQuestion}>Ask</button>
-        </div>
-      )}
+  <div>
+  <h2 style={{ color: 'white' }}>Ask a Question:</h2>
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <textarea
+      placeholder="Enter your question here"
+      value={question}
+      onChange={handleQuestionChange}
+      style={{
+        ...inputStyle,
+        fontFamily: 'YourFontFamily, sans-serif',
+        marginRight: '10px', // Add some space between textarea and button
+        width: '400px',     // Adjust the width as needed
+        height: '50px'      // Adjust the height as needed
+      }}
+    />
+    <button
+      style={{
+        width: '100px',    // Adjust the width as needed
+        height: '50px',    // Adjust the height as needed
+        display: 'inline',
+        textAlign: 'center',
+      }}
+      onClick={() => {
+        handleAskQuestion();
+        setQuestion(""); // Clear the textarea
+      }}
+    >
+      Ask
+    </button>
+  </div>
+  <div id="answerElementId"></div>
+</div>
+
+)}
       <Footer />
     </div>
   );
